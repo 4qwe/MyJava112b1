@@ -1,12 +1,12 @@
 package com.company;
 
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 
+import com.company.api.WeatherApiResponse;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.net.ssl.HttpsURLConnection; //mit HttpsURLConnection kann ich mir java.net.HttpURLConnection sparen
@@ -20,15 +20,9 @@ public class ApiCall {
 
         System.out.println("Sending Https GET request");
         String json = http.sendGet();
-        System.out.println("sendGet beendet");
-
-        System.out.println(json);
-
-        dasWetter einObjekt = new dasWetter("schlecht");
-        System.out.println(einObjekt.weather_state_name);
-        System.out.println("makeWetterJson wird ausgeführt");
-        einObjekt = http.makeWetterfromJson();
-        System.out.println(einObjekt.weather_state_name);
+        WeatherApiResponse eineResponse; //JSON String
+        eineResponse = http.makeResponsefromJson(json); // was will ich aus dem ersten Durchgang der object mapper methode für ein ergebnis haben?
+        System.out.println("Vorhersage für morgen ist " + eineResponse.consolidated_weather[1].weather_state_name);
 
     }
 
@@ -56,11 +50,10 @@ public class ApiCall {
         return s;
     }
 
-    private dasWetter makeWetterfromJson() throws JsonProcessingException {
+    private WeatherApiResponse makeResponsefromJson(String s) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
-        String s = "{ \"weather_state_name\" : \"gut\" }";
-        dasWetter einWetter = objectMapper.readValue(s, dasWetter.class);
-        return einWetter;
+        WeatherApiResponse gemapped = objectMapper.readValue(s, WeatherApiResponse.class);
+        return gemapped;
     }
 
 }
